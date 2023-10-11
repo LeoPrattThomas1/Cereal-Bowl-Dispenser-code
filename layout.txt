@@ -1,0 +1,19 @@
+void setup {
+    set cost constant_fill
+    set int 
+        weight,
+        servo_rotation
+
+}
+
+
+void Loop {
+    #   set LCD
+    #get weight of item
+
+    #   open bowl
+    #→ if Bowl 
+    #→ servo open (6) 
+    #→ Wait till [constant_fill]  (while weight != constant_fill)
+    #→ servo close (6)
+}
