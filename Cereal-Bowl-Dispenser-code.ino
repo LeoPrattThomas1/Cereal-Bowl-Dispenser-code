@@ -29,30 +29,38 @@ SOFTWARE.*/
 //              LCD VARS
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
-const uint8_t rs = 6, en = 7, d4 = 8, d5 = 9, d6 = 10, d7 = 11;
+const uint8_t rs = 6, en = 7, d4 = 8, d5 = 9, d6 = 10, d7 = 12;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-int 
+uint16_t 
   wt,
-  servoOpen  = 90,
-  servoClose = 0;
+  //servo stuff
+  servoOpen  = 45,
+  servoClose = 0,
+  //calibrate load stuff
+  calibrationAccuracy = 20,
+  calibrateDivideBy = 2;
 
+Servo myServo1; 
+Servo myServo2;
 HX711 scale;
 //              Servo/potentiometer Vars
-Servo myServo;  // create servo object to control a servo
+ // create servo object to control a servo
 
-const int servoPin = 12;
-int start = 400;
-int end = 800;
+const uint8_t servo1Pin = 3;
+const uint8_t servo2Pin = 11;
+const uint8_t potPin = A5;  // analog pin used to connect the potentiometer
+const uint8_t buttonPin = 2;
+const uint8_t 
+  dataPin = 4,
+  clockPin = 5;
 
-uint8_t potPin = A0;  // analog pin used to connect the potentiometer
-uint8_t buttonPin = 3;
+
 uint32_t val;    // variable to read the value from the analog pin
 int setWt;
 
 
 //declare scale vars
-const uint8_t dataLC = 5;
-const uint8_t clockLC = 4;
+
 volatile float Wt;
 
 
@@ -76,7 +84,8 @@ uint8_t load[8] = {
 };
 
 
-void setup() {
+void setup() 
+{
     //fill bowl vars
     const int constantFill = 10;//max wight of the seral depended in LBS
     int 
@@ -85,66 +94,67 @@ void setup() {
         bowlWeight; // wight of bowl pre dispense in LBS
 
     //servo,potentiometer setup
-    myServo.attach(servoPin);  // attaches the servo on pin 9 to the servo object
+    myServo1.attach(servo1Pin); 
+    myServo2.attach(servo2Pin);  // attaches the servo on pin 9 to the servo object
 
-    myServo.write(servoOpen); 
+    //Set up Servo
+    openServo();
     delay(500);
-    myServo.write(servoClose); 
+    openServo();//*/
+
+    //Set up button
     pinMode(buttonPin, INPUT);
 
     //LCD display setup
     lcd.begin(16, 2);
+    lcd.clear();
     lcdStartCode();
 
-    //scale inputs
-    scale.begin(dataLC, clockLC);
-    scale.set_offset(31190);
-    scale.set_scale(441.780517);
-    scale.tare();
+    //set up scale data
+    scale.begin(dataPin, clockPin);
+    scale.tare(); //Set Scale to 0 
+    scale.set_scale(243.061996); //Calibration amount for scale
+    //*/
 
-    //table code and vars
-
-    //setup serial
-    Serial.begin(9600);
-    
-
+    //serial display
+    // Serial.begin(9600); //commented out Serial to icresse performance
 }
 
-void loop() {
-    //get weight of item
-    //wt = getWt();/*
-
+void loop() 
+{
     //set WT
     setWt = lcdStartLines();
-    //if the button is pressed run the program
+
+    //If the button is pressed run the program
     if (digitalRead(buttonPin) == LOW){
+      //delay so not button infiniate loop
       delay(500);
-      fillUpCereal();
-    }//*/
+      fillUpCereal();//Fill up serial Algritam
+    }
 }
 
 
 
-
-
-
-//get the weight of the bowl and convert it into a number
-int getWt(){
-  
-  Wt = scale.get_units(5);
-  
-  delay(250); // add a bit of delay so it cna process the numbers
-    
-
-  //print to servo
-  lcd.setCursor(0, 1);
-  lcd.print("                    ");
-  lcd.setCursor(0, 1);
-  lcd.print(Wt);
-  //Serial.println(Wt);*/
-  //weight in lbs
+//despenceing cerial
+void openServo(){
+  myServo1.write(0);  //left
+  myServo2.write(0); //right
 }
 
+//#not despencing cerial
+void closeServo(){
+  myServo1.write(25); //left
+  myServo2.write(-25); //right
+}
+
+/*
+{
+  
+  Wt = scale.read();
+  Serial.println(Wt);
+  delay(250);
+  return Wt;
+}*/
 
 
 

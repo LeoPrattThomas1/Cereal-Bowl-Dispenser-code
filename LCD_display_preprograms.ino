@@ -1,21 +1,25 @@
 void fillUpCereal(){
   int wtOffset;
   int i = 1;
-  int wt;
+  volatile float wt;
 
+  
   lcdFillingSet(setWt);//set up the program
-  wtOffset = analogRead(potPin);
+  wtOffset = scale.get_units(5);  
+  wt = 0;
+
 
   //add a delay between the start so button can be unpressed for the exit
 
   //open servo
-  myServo.write(servoOpen); 
+  openServo();
 
   while(setWt > wt) {
 
 
     //get wt of pin (THIS WILL BE CHANGED)
-    wt = analogRead(potPin);
+    wt = scale.get_units(5);
+    // wt = scale.get_units(5);
     wt = wt - wtOffset;
 
     //add wt to LCD display
@@ -30,7 +34,7 @@ void fillUpCereal(){
     if (digitalRead(buttonPin) == LOW){ delay(500); break; }
   }
   //open servo
-  myServo.write(servoClose); 
+  closeServo(); 
 
   //reset the screen when were done
   lcdStartCode();
@@ -55,11 +59,14 @@ void lcdStartCode(){
 int lcdStartLines(){
   int setWeight;
   lcd.setCursor(9, 1);
-  setWeight = analogRead(potPin);
+  lcd.print("    ");
+
+  lcd.setCursor(9, 1);
+  setWeight = ((analogRead(potPin)/calibrationAccuracy)*calibrationAccuracy)/calibrateDivideBy;
   lcd.print(setWeight);
   lcd.print("g");
   
-  //add some delay so it doenst look like a stroke
+  //add some delay so it doesn't look like a stroke
   delay(50);
 
   return setWeight;
@@ -102,4 +109,3 @@ void setLCD(int loadCell){
   lcd.write(byte(0));
   //lcd.print("F");
 }
-
